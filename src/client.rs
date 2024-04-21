@@ -1,3 +1,4 @@
+use crate::project::Project;
 use crate::time_record::TimeRecord;
 use crate::user::User;
 use chrono::NaiveDate;
@@ -69,6 +70,21 @@ impl Client {
             .get(format!("/users/{user_id}/time").as_str(), Some(query))
             .await
         {
+            Ok(response) => Ok(response.json().await.unwrap()),
+            Err(error) => Err(error),
+        }
+    }
+
+    pub async fn get_projects(&self, search_query: Option<String>) -> Result<Vec<Project>, String> {
+        let mut query: Query = vec![];
+
+        query.append(&mut vec![(String::from("limit"), String::from("100"))]);
+
+        if let Some(search_query) = search_query {
+            query.append(&mut vec![(String::from("query"), search_query.to_string())])
+        }
+
+        match self.get(format!("/projects").as_str(), Some(query)).await {
             Ok(response) => Ok(response.json().await.unwrap()),
             Err(error) => Err(error),
         }

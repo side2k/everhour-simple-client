@@ -29,6 +29,7 @@ impl Client {
             request_builder = request_builder.query(&query);
         }
         let request = request_builder.build().unwrap();
+        println!("GET {}", request.url());
         match self.client.execute(request).await {
             Ok(response) => {
                 if response.status() != StatusCode::OK {

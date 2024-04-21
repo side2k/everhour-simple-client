@@ -1,4 +1,5 @@
 use crate::project::Project;
+use crate::task::Task;
 use crate::time_record::TimeRecord;
 use crate::user::User;
 use chrono::NaiveDate;
@@ -85,6 +86,38 @@ impl Client {
         }
 
         match self.get(format!("/projects").as_str(), Some(query)).await {
+            Ok(response) => Ok(response.json().await.unwrap()),
+            Err(error) => Err(error),
+        }
+    }
+    pub async fn get_project_tasks(
+        &self,
+        project_id: String,
+        search_query: Option<String>,
+        exclude_closed: Option<bool>,
+    ) -> Result<Vec<Task>, String> {
+        let mut query: Query = vec![];
+
+        query.append(&mut vec![(String::from("limit"), String::from("100"))]);
+
+        if let Some(search_query) = search_query {
+            query.append(&mut vec![(String::from("query"), search_query.to_string())])
+        }
+
+        if let Some(exclude_closed) = exclude_closed {
+            query.append(&mut vec![(
+                String::from("excludeClosed"),
+                exclude_closed.to_string(),
+            )])
+        }
+
+        match self
+            .get(
+                format!("/projects/{project_id}/tasks").as_str(),
+                Some(query),
+            )
+            .await
+        {
             Ok(response) => Ok(response.json().await.unwrap()),
             Err(error) => Err(error),
         }

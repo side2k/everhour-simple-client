@@ -175,4 +175,19 @@ impl Client {
             Err(error) => Err(error),
         }
     }
+
+    pub async fn add_task_time_record(
+        &self,
+        task_id: String,
+        time_record: TimeRecord,
+    ) -> Result<(), String> {
+        let response = self
+            .post(&format!("/tasks/{task_id}/time"), time_record)
+            .await
+            .unwrap();
+        if response.status() != 201 {
+            panic!("{:?}", response.text().await.unwrap());
+        }
+        Ok(())
+    }
 }

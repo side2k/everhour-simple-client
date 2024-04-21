@@ -28,6 +28,8 @@ pub enum Status {
     Open,
     #[serde(rename = "closed")]
     Closed,
+    #[serde(rename = "completed")]
+    Completed,
 }
 
 #[derive(Deserialize, Debug)]

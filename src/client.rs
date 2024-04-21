@@ -5,6 +5,7 @@ use crate::user::User;
 use chrono::NaiveDate;
 use reqwest::header::HeaderMap;
 use reqwest::{Client as HTTPClient, RequestBuilder, Response, StatusCode};
+use serde::ser::Serialize;
 pub struct Client {
     client: HTTPClient,
 }
@@ -51,6 +52,19 @@ impl Client {
                 }
                 Ok(response)
             }
+            Err(error) => Err(format!("{error}")),
+        }
+    }
+    async fn post<T: Serialize>(&self, path: &str, data: T) -> Result<Response, String> {
+        let request = self
+            .get_request_builder(reqwest::Method::POST, path, None)
+            .header("Content-Type", "application/json")
+            .json::<T>(&data)
+            .build()
+            .unwrap();
+        println!("POST {}", request.url());
+        match self.client.execute(request).await {
+            Ok(response) => Ok(response),
             Err(error) => Err(format!("{error}")),
         }
     }

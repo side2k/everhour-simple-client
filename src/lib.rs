@@ -1,4 +1,6 @@
 pub mod client;
+pub mod task;
+pub mod time_record;
 pub mod user;
 
 pub fn add(left: usize, right: usize) -> usize {

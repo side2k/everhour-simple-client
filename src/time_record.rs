@@ -22,3 +22,18 @@ pub struct TimeRecord {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub comment: Option<String>,
 }
+
+impl TimeRecord {
+    pub fn for_adding(date: NaiveDate, user: i64, time: i64, comment: Option<String>) -> Self {
+        TimeRecord {
+            id: None,
+            time,
+            user,
+            date,
+            task: None,
+            is_locked: None,
+            is_invoiced: None,
+            comment,
+        }
+    }
+}

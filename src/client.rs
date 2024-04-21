@@ -76,6 +76,33 @@ impl Client {
         }
     }
 
+    pub async fn get_task_time_records(
+        &self,
+        task_id: String,
+        from: Option<NaiveDate>,
+        to: Option<NaiveDate>,
+    ) -> Result<Vec<TimeRecord>, String> {
+        let mut query: Query = vec![];
+
+        query.append(&mut vec![(String::from("limit"), String::from("100"))]);
+
+        if let Some(from) = from {
+            query.append(&mut vec![(String::from("from"), from.to_string())])
+        }
+
+        if let Some(to) = to {
+            query.append(&mut vec![(String::from("to"), to.to_string())])
+        }
+
+        match self
+            .get(format!("/tasks/{task_id}/time").as_str(), Some(query))
+            .await
+        {
+            Ok(response) => Ok(response.json().await.unwrap()),
+            Err(error) => Err(error),
+        }
+    }
+
     pub async fn get_projects(&self, search_query: Option<String>) -> Result<Vec<Project>, String> {
         let mut query: Query = vec![];
 

@@ -4,7 +4,7 @@ use crate::time_record::TimeRecord;
 use crate::user::User;
 use chrono::NaiveDate;
 use reqwest::header::HeaderMap;
-use reqwest::{Client as HTTPClient, Response, StatusCode};
+use reqwest::{Client as HTTPClient, RequestBuilder, Response, StatusCode};
 pub struct Client {
     client: HTTPClient,
 }
@@ -23,14 +23,26 @@ impl Client {
         Client { client }
     }
 
-    async fn get(&self, path: &str, query: Option<Query>) -> Result<Response, String> {
+    fn get_request_builder(
+        &self,
+        method: reqwest::Method,
+        path: &str,
+        query: Option<Query>,
+    ) -> RequestBuilder {
         let base_url = "https://api.everhour.com";
         let url = format!("{base_url}{path}");
-        let mut request_builder = self.client.request(reqwest::Method::GET, url);
+        let mut request_builder = self.client.request(method, url);
         if let Some(query) = query {
             request_builder = request_builder.query(&query);
         }
-        let request = request_builder.build().unwrap();
+        request_builder
+    }
+
+    async fn get(&self, path: &str, query: Option<Query>) -> Result<Response, String> {
+        let request = self
+            .get_request_builder(reqwest::Method::GET, path, query)
+            .build()
+            .unwrap();
         println!("GET {}", request.url());
         match self.client.execute(request).await {
             Ok(response) => {

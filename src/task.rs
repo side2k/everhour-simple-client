@@ -1,6 +1,6 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Task {
     pub id: String,
     pub name: String,
@@ -22,7 +22,7 @@ pub struct Task {
     pub unbillable: Option<bool>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub enum Status {
     #[serde(rename = "open")]
     Open,
@@ -32,14 +32,14 @@ pub enum Status {
     Completed,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct TaskTime {
     /// Total task time in seconds
     pub total: i64,
     pub users: serde_json::Value,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct TaskEstimate {
     /// Total task estimate in seconds
     pub total: i64,
@@ -48,7 +48,7 @@ pub struct TaskEstimate {
     pub users: Option<serde_json::Value>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub enum TaskEstimateType {
     #[serde(rename = "overall")]
     Overall,

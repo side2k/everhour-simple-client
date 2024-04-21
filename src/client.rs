@@ -1,10 +1,13 @@
 use crate::time_record::TimeRecord;
 use crate::user::User;
+use chrono::NaiveDate;
 use reqwest::header::HeaderMap;
 use reqwest::{Client as HTTPClient, Response, StatusCode};
 pub struct Client {
     client: HTTPClient,
 }
+
+type Query = Vec<(String, String)>;
 
 impl Client {
     pub fn new(api_token: String) -> Self {
@@ -18,14 +21,14 @@ impl Client {
         Client { client }
     }
 
-    async fn get(&self, path: &str) -> Result<Response, String> {
+    async fn get(&self, path: &str, query: Option<Query>) -> Result<Response, String> {
         let base_url = "https://api.everhour.com";
         let url = format!("{base_url}{path}");
-        let request = self
-            .client
-            .request(reqwest::Method::GET, url)
-            .build()
-            .unwrap();
+        let mut request_builder = self.client.request(reqwest::Method::GET, url);
+        if let Some(query) = query {
+            request_builder = request_builder.query(&query);
+        }
+        let request = request_builder.build().unwrap();
         match self.client.execute(request).await {
             Ok(response) => {
                 if response.status() != StatusCode::OK {
@@ -38,14 +41,31 @@ impl Client {
     }
 
     pub async fn get_current_user(&self) -> Result<User, String> {
-        match self.get("/users/me").await {
+        match self.get("/users/me", None).await {
             Ok(response) => Ok(response.json().await.unwrap()),
             Err(error) => Err(error),
         }
     }
-    pub async fn get_user_time_records(&self, user_id: i64) -> Result<Vec<TimeRecord>, String> {
+    pub async fn get_user_time_records(
+        &self,
+        user_id: i64,
+        from: Option<NaiveDate>,
+        to: Option<NaiveDate>,
+    ) -> Result<Vec<TimeRecord>, String> {
+        let mut query: Query = vec![];
+
+        query.append(&mut vec![(String::from("limit"), String::from("100"))]);
+
+        if let Some(from) = from {
+            query.append(&mut vec![(String::from("from"), from.to_string())])
+        }
+
+        if let Some(to) = to {
+            query.append(&mut vec![(String::from("to"), to.to_string())])
+        }
+
         match self
-            .get(format!("/users/{user_id}/time?limit=1").as_str())
+            .get(format!("/users/{user_id}/time").as_str(), Some(query))
             .await
         {
             Ok(response) => Ok(response.json().await.unwrap()),

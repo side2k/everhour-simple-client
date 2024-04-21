@@ -1,3 +1,4 @@
+use crate::time_record::TimeRecord;
 use crate::user::User;
 use reqwest::header::HeaderMap;
 use reqwest::{Client as HTTPClient, Response, StatusCode};
@@ -38,6 +39,15 @@ impl Client {
 
     pub async fn get_current_user(&self) -> Result<User, String> {
         match self.get("/users/me").await {
+            Ok(response) => Ok(response.json().await.unwrap()),
+            Err(error) => Err(error),
+        }
+    }
+    pub async fn get_user_time_records(&self, user_id: i64) -> Result<Vec<TimeRecord>, String> {
+        match self
+            .get(format!("/users/{user_id}/time?limit=1").as_str())
+            .await
+        {
             Ok(response) => Ok(response.json().await.unwrap()),
             Err(error) => Err(error),
         }

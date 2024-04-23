@@ -46,12 +46,10 @@ impl Client {
             .unwrap();
         println!("GET {}", request.url());
         match self.client.execute(request).await {
-            Ok(response) => {
-                if response.status() != StatusCode::OK {
-                    panic!("Got status code {}", response.status());
-                }
-                Ok(response)
-            }
+            Ok(response) => match response.status() {
+                StatusCode::OK => Err(format!("Got status code {}", response.status())),
+                _ => Ok(response),
+            },
             Err(error) => Err(format!("{error}")),
         }
     }
@@ -200,9 +198,10 @@ impl Client {
             .await
             .unwrap();
         if response.status() != 201 {
-            panic!("{:?}", response.text().await.unwrap());
+            Err(format!("{:?}", response.text().await.unwrap()))
+        } else {
+            Ok(())
         }
-        Ok(())
     }
     pub async fn update_task_time_record(
         &self,
@@ -214,8 +213,9 @@ impl Client {
             .await
             .unwrap();
         if response.status() != 200 {
-            panic!("{:?}", response.text().await.unwrap());
+            Err(format!("{:?}", response.text().await.unwrap()))
+        } else {
+            Ok(())
         }
-        Ok(())
     }
 }

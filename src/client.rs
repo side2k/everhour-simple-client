@@ -69,6 +69,20 @@ impl Client {
         }
     }
 
+    async fn put<T: Serialize>(&self, path: &str, data: T) -> Result<Response, String> {
+        let request = self
+            .get_request_builder(reqwest::Method::PUT, path, None)
+            .header("Content-Type", "application/json")
+            .json::<T>(&data)
+            .build()
+            .unwrap();
+        println!("PUT {}", request.url());
+        match self.client.execute(request).await {
+            Ok(response) => Ok(response),
+            Err(error) => Err(format!("{error}")),
+        }
+    }
+
     pub async fn get_current_user(&self) -> Result<User, String> {
         match self.get("/users/me", None).await {
             Ok(response) => Ok(response.json().await.unwrap()),

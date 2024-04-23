@@ -204,4 +204,18 @@ impl Client {
         }
         Ok(())
     }
+    pub async fn update_task_time_record(
+        &self,
+        task_id: String,
+        time_record: TimeRecord,
+    ) -> Result<(), String> {
+        let response = self
+            .put(&format!("/tasks/{task_id}/time"), time_record)
+            .await
+            .unwrap();
+        if response.status() != 200 {
+            panic!("{:?}", response.text().await.unwrap());
+        }
+        Ok(())
+    }
 }
